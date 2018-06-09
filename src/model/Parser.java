@@ -29,14 +29,16 @@ public class Parser {
         Node c = new ParseNode("constant");
         Node b3 = new ParseNode("border3");
         Node fi = new ParseNode("fake_instruction");
-        Node r = new ParseNode("register");
+        Node r1 = new ParseNode("register1");
         Node l2 = new ParseNode("label2");
         Node b2 = new ParseNode("border2");
-        dfa = new DFA(start, null);
+        Node b4 = new ParseNode("border4");
+        dfa = new DFA(start, null, DFA.Mode.GUESS);
         dfa.addTransform(
                 start,
                 start,
                 (from, input) -> ((Token) input).getTokenType().equals(TokenType.ENDLINE)
+                        || ((Token) input).getTokenType().equals(TokenType.COMMENT)
         );
         dfa.addTransform(
                 start,
@@ -143,24 +145,36 @@ public class Parser {
         );
         dfa.addTransform(
                 fi,
-                r,
+                r1,
                 (from, input) -> ((Token) input).getTokenType().equals(TokenType.REGISTER)
         );
         dfa.addTransform(
-                r,
-                l2,
-                (from, input) -> ((Token) input).getTokenType().equals(TokenType.BORDER)
-        );
-        dfa.addTransform(
-                l2,
+                r1,
                 b2,
                 (from, input) -> ((Token) input).getTokenType().equals(TokenType.BORDER)
                         && ((Token) input).getLabel().equals(":")
         );
         dfa.addTransform(
                 b2,
-                r,
+                l2,
+                (from, input) -> ((Token) input).getTokenType().equals(TokenType.LABEL)
+
+        );
+        dfa.addTransform(
+                l2,
+                b4,
+                (from, input) -> ((Token) input).getTokenType().equals(TokenType.BORDER)
+                        && ((Token) input).getLabel().equals(",")
+        );
+        dfa.addTransform(
+                b4,
+                r1,
                 (from, input) -> ((Token) input).getTokenType().equals(TokenType.REGISTER)
+        );
+        dfa.addTransform(
+                l2,
+                start,
+                (from, input) -> ((Token) input).getTokenType().equals(TokenType.ENDLINE)
         );
     }
 
@@ -177,10 +191,9 @@ public class Parser {
             } catch (NoSuchTransformationException e) {
                 token.setError(true);
 
-                System.out.println("parse error: unexpected token, " + ((Token) e.getInput()).getLabel() + ";" +
+                System.out.println("parse error: unexpected token " + ((Token) e.getInput()).getLabel() +
                         " at line " + (((Token) e.getInput()).getLineNum() + 1));
                 System.out.println("-----------------------------------------");
-                break;
             }
         }
     }
