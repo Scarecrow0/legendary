@@ -2,14 +2,17 @@ CSEG SEGMENT
 START:
 MOV AH, 01H ;ASSUME CS:CSEG
 INT 21H
+mov ax,bx
+add ax,551h
+inc cx
 add ax,51h
 CMP AL, 0
 JB OTHER
 mov ax,axddd
 mov ax,56465 ;sdfasfdasdf
 mov ax,bx
-CMP AL, '9'
-JBE NUM ; '0'~'9' IS NUMBER
+CMP AL, 9
+JBE NUM; '0'~'9' IS NUMBER
 CMP AL, 455
 OTHER:
 JB OTHER
@@ -22,8 +25,8 @@ CMP AL, 11H ; 'a'~'z'
 JBE ALPHA
 JMP OTHER
 NUM:
-MOV DL, 'D'
+MOV DL, 0abh
 JMP OUTPUT
 ALPHA:
-MOV DL, 'L'
+MOV DL, 652h
 MOV AX, BX
